@@ -39,6 +39,20 @@ jobs:
       - name: Generate Android scaffolding
         run: flutter create --platforms=android .
 
+      # The committed Android Gradle Plugin (8.6) needs Gradle >= 8.7, but
+      # `flutter create` writes an older wrapper. Pin a compatible Gradle.
+      - name: Pin Gradle wrapper version
+        run: |
+          mkdir -p android/gradle/wrapper
+          cat > android/gradle/wrapper/gradle-wrapper.properties <<'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-all.zip
+          EOF
+          cat android/gradle/wrapper/gradle-wrapper.properties
+
       - name: Install dependencies
         run: flutter pub get
 
