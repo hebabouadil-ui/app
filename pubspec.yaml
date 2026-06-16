@@ -40,7 +40,8 @@ dependencies:
 
   # Notifications
   flutter_local_notifications: ^18.0.1
-  timezone: ^0.9.4
+  # Pinned by flutter_local_notifications; use `any` to avoid resolver conflicts.
+  timezone: any
 
   # Privacy / compliance
   permission_handler: ^11.3.1
@@ -57,7 +58,8 @@ dependencies:
   flutter_animate: ^4.5.0
 
   # Utilities
-  intl: ^0.19.0
+  # Pinned by flutter_localizations (SDK); `any` defers to that exact version.
+  intl: any
   uuid: ^4.5.1
   package_info_plus: ^8.1.1
 
