@@ -1,0 +1,65 @@
+{
+  "@@locale": "es",
+  "appTitle": "Dream AI",
+  "tagline": "Analizador facial y predicciones divertidas",
+  "forEntertainmentOnly": "Solo para entretenimiento",
+  "entertainmentDisclaimer": "Esta aplicación está destinada únicamente al entretenimiento y no ofrece asesoramiento científico, médico ni psicológico.",
+
+  "navHome": "Inicio",
+  "navPredictions": "Diario",
+  "navRewards": "Premios",
+  "navProfile": "Perfil",
+
+  "actionGetStarted": "Empezar",
+  "actionNext": "Siguiente",
+  "actionSkip": "Omitir",
+  "actionAllow": "Permitir",
+  "actionMaybeLater": "Quizás luego",
+  "actionContinue": "Continuar",
+  "actionDone": "Listo",
+  "actionCancel": "Cancelar",
+  "actionTryAgain": "Reintentar",
+  "actionSave": "Guardar",
+  "actionClose": "Cerrar",
+
+  "onbTitle1": "Descubre tu vibra diaria",
+  "onbBody1": "Análisis faciales divertidos y predicciones, renovados cada día.",
+  "onbTitle2": "Solo por diversión",
+  "onbBody2": "Todo aquí es solo entretenimiento: sin ciencia, sin juicios, solo buena vibra.",
+  "onbTitle3": "No te lo pierdas",
+  "onbBody3": "Activa la cámara y las notificaciones para escanear tu brillo y no perderte ninguna predicción.",
+
+  "homeTodaySnapshot": "Resumen de hoy",
+  "homeExplore": "Explorar",
+
+  "scanTitle": "Escaneo facial",
+  "scanSubtitle": "Toma o sube una foto. La detección ocurre en tu dispositivo.",
+  "scanTakePhoto": "Tomar foto",
+  "scanUploadPhoto": "Subir foto",
+  "scanAnalyze": "Analizar",
+
+  "predictionsTitle": "Predicciones diarias",
+  "predLuck": "Suerte",
+  "predEnergy": "Energía",
+  "predProductivity": "Productividad",
+  "predSocial": "Social",
+  "predMood": "Pronóstico de ánimo",
+
+  "rewardsTitle": "Premios",
+  "rewardsBadges": "Insignias",
+  "rewardsChallenge": "Reto semanal",
+
+  "premiumTitle": "Dream AI Premium",
+  "premiumSubtitle": "Desbloquea todo y quita los anuncios.",
+  "premiumRestore": "Restaurar compras",
+
+  "settingsTitle": "Ajustes",
+  "settingsAppearance": "Apariencia",
+  "settingsLanguage": "Idioma",
+  "settingsPrivacy": "Política de privacidad",
+  "settingsTerms": "Términos del servicio",
+
+  "consentTitle": "Tu privacidad",
+  "consentAccept": "Aceptar",
+  "consentManage": "Gestionar opciones"
+}

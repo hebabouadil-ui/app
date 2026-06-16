@@ -1,0 +1,2 @@
+# Place raster/vector image assets here (logos, illustrations, backgrounds).
+# Referenced via lib/core/constants/asset_paths.dart.

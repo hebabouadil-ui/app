@@ -1,0 +1,56 @@
+{
+  "@@locale": "ar",
+  "appTitle": "Dream AI",
+  "tagline": "محلل الوجه وتوقعات يومية ممتعة",
+  "forEntertainmentOnly": "للترفيه فقط",
+  "entertainmentDisclaimer": "هذا التطبيق مخصص للترفيه فقط ولا يقدم أي نصيحة علمية أو طبية أو نفسية.",
+
+  "navHome": "الرئيسية",
+  "navPredictions": "اليومي",
+  "navRewards": "المكافآت",
+  "navProfile": "الملف",
+
+  "actionGetStarted": "ابدأ",
+  "actionNext": "التالي",
+  "actionSkip": "تخطٍ",
+  "actionAllow": "السماح",
+  "actionMaybeLater": "لاحقًا",
+  "actionContinue": "متابعة",
+  "actionDone": "تم",
+  "actionCancel": "إلغاء",
+  "actionTryAgain": "حاول مجددًا",
+
+  "onbTitle1": "اكتشف طاقتك اليومية",
+  "onbBody1": "تحليلات وجه ممتعة وتوقعات تتجدد كل يوم.",
+  "onbTitle2": "للمتعة فقط",
+  "onbBody2": "كل شيء هنا للترفيه فقط — بلا علم وبلا أحكام، فقط طاقة إيجابية.",
+  "onbTitle3": "ابقَ على اطلاع",
+  "onbBody3": "فعّل الكاميرا والإشعارات لمسح إشراقتك ولا تفوّت أي توقع يومي.",
+
+  "scanTitle": "مسح الوجه",
+  "scanTakePhoto": "التقاط صورة",
+  "scanUploadPhoto": "رفع صورة",
+  "scanAnalyze": "تحليل",
+
+  "predictionsTitle": "التوقعات اليومية",
+  "predLuck": "الحظ",
+  "predEnergy": "الطاقة",
+  "predProductivity": "الإنتاجية",
+  "predSocial": "الاجتماعي",
+
+  "rewardsTitle": "المكافآت",
+  "rewardsBadges": "الأوسمة",
+  "rewardsChallenge": "تحدي الأسبوع",
+
+  "premiumTitle": "Dream AI بريميوم",
+  "premiumRestore": "استعادة المشتريات",
+
+  "settingsTitle": "الإعدادات",
+  "settingsLanguage": "اللغة",
+  "settingsPrivacy": "سياسة الخصوصية",
+  "settingsTerms": "شروط الخدمة",
+
+  "consentTitle": "خصوصيتك",
+  "consentAccept": "موافقة",
+  "consentManage": "إدارة الخيارات"
+}
