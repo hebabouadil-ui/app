@@ -3,9 +3,6 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after Android & Kotlin.
     id "dev.flutter.flutter-gradle-plugin"
-    // Firebase (Google Services). Safe to keep even before adding the real
-    // google-services.json — see docs/FIREBASE_SETUP.md.
-    id "com.google.gms.google-services"
 }
 
 def localProperties = new Properties()
@@ -77,4 +74,11 @@ flutter {
 dependencies {
     // Firebase BoM keeps Firebase library versions aligned.
     implementation platform("com.google.firebase:firebase-bom:33.7.0")
+}
+
+// Apply Firebase's Google Services plugin ONLY when google-services.json is
+// present. This lets the app build (and produce an APK) without Firebase during
+// development / CI; drop the file in android/app/ to enable Firebase.
+if (project.file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
 }
