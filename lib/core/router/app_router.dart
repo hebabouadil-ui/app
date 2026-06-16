@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../data/models/analysis_result.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/legal/disclaimer_screen.dart';
 import '../../features/legal/privacy_policy_screen.dart';
@@ -145,6 +144,3 @@ final goRouterProvider = Provider<GoRouter>((Ref ref) {
     ),
   );
 });
-
-/// Re-export so result screen can reference the outcome type cleanly.
-typedef RouteAnalysisResult = AnalysisResult;
