@@ -29,12 +29,10 @@ class ShareService {
   }) async {
     try {
       final File file = await _writeTempImage(bytes);
-      final ShareResult result = await SharePlus.instance.share(
-        ShareParams(
-          text: text,
-          subject: subject,
-          files: <XFile>[XFile(file.path, mimeType: 'image/png')],
-        ),
+      final ShareResult result = await Share.shareXFiles(
+        <XFile>[XFile(file.path, mimeType: 'image/png')],
+        text: text,
+        subject: subject,
       );
       return result.status == ShareResultStatus.success;
     } catch (e) {
@@ -46,9 +44,7 @@ class ShareService {
   /// Shares plain text (e.g. a referral invite link).
   Future<bool> shareText(String text, {String? subject}) async {
     try {
-      final ShareResult result = await SharePlus.instance.share(
-        ShareParams(text: text, subject: subject),
-      );
+      final ShareResult result = await Share.share(text, subject: subject);
       return result.status == ShareResultStatus.success;
     } catch (e) {
       debugPrint('shareText failed: $e');

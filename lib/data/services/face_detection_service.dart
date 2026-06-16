@@ -74,8 +74,11 @@ class FaceDetectionService {
       final double roll = (face.headEulerAngleZ ?? 0).abs();
       return (1 - (roll / 45)).clamp(0.3, 1.0);
     }
-    final double leftDist = (nose.position.x - leftEye.position.x).abs();
-    final double rightDist = (rightEye.position.x - nose.position.x).abs();
+    // ML Kit landmark positions are Point<int>, so coerce to double.
+    final double leftDist =
+        (nose.position.x - leftEye.position.x).abs().toDouble();
+    final double rightDist =
+        (rightEye.position.x - nose.position.x).abs().toDouble();
     final double maxDist = math.max(leftDist, rightDist);
     if (maxDist == 0) return 0.7;
     final double ratio = math.min(leftDist, rightDist) / maxDist;

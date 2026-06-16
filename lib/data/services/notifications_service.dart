@@ -114,6 +114,8 @@ class NotificationsService {
         _nextInstanceOf(hour, minute),
         _details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time, // repeats daily
       );
     } catch (e) {
