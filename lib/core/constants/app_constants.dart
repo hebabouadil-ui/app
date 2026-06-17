@@ -8,7 +8,7 @@ abstract final class AppConstants {
       'This app is intended solely for entertainment purposes and does not '
       'provide scientific, medical, or psychological advice.';
 
-  static const String shortDisclaimer = 'For entertainment only • Just for fun';
+  static const String shortDisclaimer = 'AI face & palm reading • just for fun';
 
   // Legal / support links (replace with real URLs before release).
   static const String privacyPolicyUrl = 'https://dreamai.app/privacy';

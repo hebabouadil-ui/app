@@ -125,4 +125,25 @@ abstract final class ResultContent {
     'Reading your energy...',
     'Your aura whispered something fun:',
   ];
+
+  // ---- Palm reading ---------------------------------------------------------
+  static const List<({String name, String emoji})> palmArchetypes = [
+    (name: 'The Creator\'s Hand', emoji: '🖐️'),
+    (name: 'The Dreamer\'s Palm', emoji: '✋'),
+    (name: 'The Achiever\'s Hand', emoji: '🤚'),
+    (name: 'The Healer\'s Palm', emoji: '🌿'),
+    (name: 'The Adventurer\'s Hand', emoji: '🧭'),
+    (name: 'The Old Soul\'s Palm', emoji: '🔮'),
+    (name: 'The Leader\'s Hand', emoji: '👑'),
+  ];
+
+  static const List<String> palmFortunes = [
+    'your lines point to a bright new chapter — say yes to an opportunity soon.',
+    'a strong heart line: deep, genuine connections are forming around you.',
+    'your head line is sharp — trust your very first instinct this week.',
+    'a bold life line: vitality and big moves are on your side right now.',
+    'your fate line is rising — a small, brave risk could pay off beautifully.',
+    'creativity is flowing through your palm; make something this week.',
+    'a lucky crossing in your palm — keep your eyes open for a happy surprise.',
+  ];
 }

@@ -5,6 +5,7 @@ import '../data/services/ads_service.dart';
 import '../data/services/analytics_service.dart';
 import '../data/services/consent_service.dart';
 import '../data/services/face_detection_service.dart';
+import '../data/services/image_scan_service.dart';
 import '../data/services/notifications_service.dart';
 import '../data/services/purchase_service.dart';
 import '../data/services/result_generator.dart';
@@ -54,6 +55,9 @@ final faceDetectionServiceProvider = Provider<FaceDetectionService>((Ref ref) {
 });
 
 final shareServiceProvider = Provider<ShareService>((Ref ref) => ShareService());
+
+final imageScanServiceProvider =
+    Provider<ImageScanService>((Ref ref) => ImageScanService());
 
 final reviewServiceProvider = Provider<ReviewService>(
   (Ref ref) => ReviewService(ref.watch(storageServiceProvider)),

@@ -27,7 +27,7 @@ Future<void> startExperience(
   }
   if (!context.mounted) return;
 
-  if (type.requiresFace) {
+  if (type.requiresImage) {
     context.push(
       AppRoutes.scan,
       extra: ScanArgs(type: type, alreadyUnlocked: unlocked),

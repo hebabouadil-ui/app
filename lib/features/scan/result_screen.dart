@@ -1,16 +1,17 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:screenshot/screenshot.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/router/app_routes.dart';
 import '../../data/models/analysis_result.dart';
 import '../../providers/gamification_provider.dart';
 import '../../providers/service_providers.dart';
-import '../../shared/widgets/disclaimer_banner.dart';
 import '../../shared/widgets/glass_card.dart';
 import '../../shared/widgets/gradient_background.dart';
 import '../../shared/widgets/metric_bar.dart';
@@ -98,7 +99,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 Screenshot(
                   controller: _shot,
                   child: ShareableResultCard(result: r),
-                ),
+                )
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .scale(begin: const Offset(0.92, 0.92), end: const Offset(1, 1)),
                 const SizedBox(height: 20),
                 GlassCard(
                   child: Column(
@@ -159,7 +163,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const DisclaimerBanner(),
+                Text(
+                  AppConstants.shortDisclaimer,
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.bodySmall,
+                ),
               ],
             ),
           ),

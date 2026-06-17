@@ -6,21 +6,26 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 /// Product identifiers. These must match the ids configured in Google Play
 /// Console and App Store Connect (see the store checklists in /docs).
 abstract final class ProductIds {
+  /// The single headline one-time purchase: unlocks all advanced readings
+  /// (Palm Reading, Leadership, Romance, Celebrity, Friendship) and removes ads.
+  static const String pro = 'dreamai_pro';
+
+  // Legacy/secondary products (kept for backwards compatibility / restores).
   static const String adFree = 'dreamai_ad_free';
   static const String premiumUnlimited = 'dreamai_premium_unlimited';
-  static const String compatibilityPack = 'dreamai_compatibility_pack';
-  static const String themePack = 'dreamai_theme_pack';
 
   /// All non-consumable, one-time unlocks.
   static const Set<String> all = <String>{
+    pro,
     adFree,
     premiumUnlimited,
-    compatibilityPack,
-    themePack,
   };
 
   /// Products that also remove ads.
-  static const Set<String> removesAds = <String>{adFree, premiumUnlimited};
+  static const Set<String> removesAds = <String>{pro, adFree, premiumUnlimited};
+
+  /// Products that unlock the advanced (premium) experiences.
+  static const Set<String> unlocksPro = <String>{pro, premiumUnlimited};
 }
 
 /// Wraps `in_app_purchase`. Fails safe when billing is unavailable (e.g. the

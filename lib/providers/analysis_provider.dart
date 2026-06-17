@@ -152,6 +152,33 @@ class AnalysisController {
     return (result: result, delta: delta);
   }
 
+  /// Palm reading from a scanned hand photo (on-device image seed).
+  Future<AnalysisOutcome> runPalm({
+    required String imagePath,
+    bool countsAgainstQuota = true,
+  }) async {
+    final analytics = ref.read(analyticsServiceProvider);
+    analytics.logAnalysisStarted(AnalysisType.palmReading.id);
+    final String seed =
+        await ref.read(imageScanServiceProvider).scanSignature(imagePath);
+    final AnalysisResult result =
+        ref.read(resultGeneratorProvider).generatePalm(
+              imageSeed: seed,
+              salt: ref.read(userProvider).id,
+            );
+    await ref.read(analysisHistoryProvider.notifier).add(result);
+    if (countsAgainstQuota) {
+      await ref.read(analysisQuotaProvider.notifier).increment();
+    }
+    final GamificationDelta delta = await ref
+        .read(gamificationProvider.notifier)
+        .recordAnalysis(AnalysisType.palmReading);
+    analytics.logAnalysisCompleted(
+        AnalysisType.palmReading.id, result.primaryScore);
+    ref.read(reviewServiceProvider).recordPositiveInteraction();
+    return (result: result, delta: delta);
+  }
+
   /// Friendship compatibility from two scanned faces.
   Future<AnalysisOutcome> runFriendship({
     required FaceFeatures a,

@@ -27,14 +27,13 @@ class SettingsState {
   final Set<String> ownedProducts;
   final String visualTheme;
 
-  bool get adsRemoved =>
-      ownedProducts.any(ProductIds.removesAds.contains);
-  bool get hasUnlimited =>
-      ownedProducts.contains(ProductIds.premiumUnlimited);
-  bool get hasCompatibilityPack =>
-      ownedProducts.contains(ProductIds.compatibilityPack);
-  bool get hasThemePack => ownedProducts.contains(ProductIds.themePack);
-  bool get isPremium => ownedProducts.isNotEmpty;
+  /// Owns the one-time Pro unlock (advanced readings).
+  bool get isPro => ownedProducts.any(ProductIds.unlocksPro.contains);
+  bool get adsRemoved => ownedProducts.any(ProductIds.removesAds.contains);
+
+  /// Back-compat alias used by older call sites.
+  bool get hasUnlimited => isPro;
+  bool get isPremium => isPro;
 
   SettingsState copyWith({
     bool? onboardingComplete,

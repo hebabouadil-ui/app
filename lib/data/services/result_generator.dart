@@ -57,10 +57,46 @@ class ResultGenerator {
         return _fromDaily(AnalysisType.futureMood, generateDailyPrediction(ts, salt: salt), ts, id);
       case AnalysisType.positiveMessage:
         return _fromDaily(AnalysisType.positiveMessage, generateDailyPrediction(ts, salt: salt), ts, id);
+      case AnalysisType.palmReading:
+        // Palm uses an image seed; callers should use [generatePalm]. This is a
+        // safe fallback so the switch stays exhaustive.
+        return generatePalm(imageSeed: features.seedSignature, now: ts, salt: salt);
       case AnalysisType.friendshipCompatibility:
         // Friendship needs two faces; callers should use [generateFriendship].
         return _friendship(features, const FaceFeatures.none(), ts, salt: salt);
     }
+  }
+
+  /// Palm reading from a scanned hand photo's [imageSeed]
+  /// (see ImageScanService). Entertainment-only palmistry flavor.
+  AnalysisResult generatePalm({
+    required String imageSeed,
+    DateTime? now,
+    String salt = '',
+  }) {
+    final DateTime ts = now ?? DateTime.now();
+    final SeededRandom r = SeededRandom.fromString('palm|$imageSeed|$salt');
+    final arche = r.pick(ResultContent.palmArchetypes);
+    final int score = r.nextScore(min: 60);
+    return AnalysisResult(
+      id: 'palm-${ts.microsecondsSinceEpoch}',
+      type: AnalysisType.palmReading,
+      createdAt: ts,
+      primaryScore: score,
+      title: arche.name,
+      subtitle: 'Your palm reading',
+      summary:
+          '${r.pick(ResultContent.summaryOpeners)} ${r.pick(ResultContent.palmFortunes)}',
+      metrics: <ResultMetric>[
+        ResultMetric(label: 'Life Line', value: r.nextScore(min: 55)),
+        ResultMetric(label: 'Heart Line', value: r.nextScore(min: 55)),
+        ResultMetric(label: 'Head Line', value: r.nextScore(min: 55)),
+        ResultMetric(label: 'Fate Line', value: r.nextScore(min: 50)),
+      ],
+      traits: r.pickMany(ResultContent.traits, 3),
+      gradientName: 'royal',
+      emoji: arche.emoji,
+    );
   }
 
   /// Compatibility between two scanned faces.

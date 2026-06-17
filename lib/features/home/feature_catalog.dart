@@ -22,6 +22,8 @@ FeatureCopy featureCopy(BuildContext context, AnalysisType type) {
         title: l10n.featureFirstImpressionTitle,
         description: l10n.featureFirstImpressionDesc
       );
+    case AnalysisType.palmReading:
+      return (title: l10n.featurePalmTitle, description: l10n.featurePalmDesc);
     case AnalysisType.leadership:
       return (
         title: l10n.featureLeadershipTitle,
@@ -57,6 +59,7 @@ FeatureCopy featureCopy(BuildContext context, AnalysisType type) {
 /// The display order on the home screen.
 const List<AnalysisType> homeFeatureOrder = <AnalysisType>[
   AnalysisType.auraScore,
+  AnalysisType.palmReading,
   AnalysisType.personality,
   AnalysisType.firstImpression,
   AnalysisType.leadership,

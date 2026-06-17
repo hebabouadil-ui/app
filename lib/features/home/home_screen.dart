@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +13,6 @@ import '../../providers/service_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../shared/widgets/app_logo.dart';
-import '../../shared/widgets/disclaimer_banner.dart';
 import '../../shared/widgets/gradient_background.dart';
 import '../../shared/widgets/native_ad_card.dart';
 import '../../shared/widgets/section_header.dart';
@@ -112,18 +112,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 0.92,
                     children: <Widget>[
-                      for (final AnalysisType type in homeFeatureOrder)
+                      for (final (int i, AnalysisType type)
+                          in homeFeatureOrder.indexed)
                         FeatureCard(
                           type: type,
                           locked: type.isPremium && !unlimited,
                           onTap: () => startExperience(context, ref, type),
-                        ),
+                        )
+                            .animate(delay: (40 * i).ms)
+                            .fadeIn(duration: 260.ms)
+                            .slideY(begin: 0.12, end: 0),
                     ],
                   ),
                   const SizedBox(height: 20),
                   const NativeAdCard(),
-                  const SizedBox(height: 20),
-                  const DisclaimerBanner(),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppConstants.shortDisclaimer,
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),

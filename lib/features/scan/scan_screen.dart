@@ -5,12 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/router/route_args.dart';
 import '../../core/theme/app_gradients.dart';
 import '../../data/models/analysis_type.dart';
-import '../../shared/widgets/disclaimer_banner.dart';
 import '../../shared/widgets/gradient_background.dart';
 
 class ScanScreen extends ConsumerStatefulWidget {
@@ -30,6 +30,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   bool get _isFriendship =>
       widget.args.type == AnalysisType.friendshipCompatibility;
 
+  bool get _isHand => widget.args.type.scanKind == ScanKind.hand;
+
   bool get _ready =>
       _imagePath != null && (!_isFriendship || _secondImagePath != null);
 
@@ -39,7 +41,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         source: source,
         maxWidth: 1280,
         imageQuality: 90,
-        preferredCameraDevice: CameraDevice.front,
+        preferredCameraDevice:
+            _isHand ? CameraDevice.rear : CameraDevice.front,
       );
       if (file == null) return;
       setState(() {
@@ -70,7 +73,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.scanTitle)),
+      appBar: AppBar(title: Text(_isHand ? 'Palm Scan' : l10n.scanTitle)),
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -78,10 +81,17 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Text(l10n.scanSubtitle, style: context.textTheme.bodyMedium),
+                Text(
+                  _isHand
+                      ? 'Take a clear photo of your open palm. The scan runs on your device.'
+                      : l10n.scanSubtitle,
+                  style: context.textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 20),
                 _PhotoSlot(
-                  label: _isFriendship ? 'You' : null,
+                  label: _isFriendship ? 'You' : (_isHand ? 'Your palm' : null),
+                  placeholderIcon:
+                      _isHand ? Icons.front_hand : Icons.face_retouching_natural,
                   imagePath: _imagePath,
                   onCamera: () => _pick(ImageSource.camera, second: false),
                   onGallery: () => _pick(ImageSource.gallery, second: false),
@@ -102,10 +112,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                   label: Text(l10n.scanAnalyze),
                 ),
                 const SizedBox(height: 12),
-                const DisclaimerBanner(compact: true),
-                const SizedBox(height: 8),
                 Text(
-                  'Photos are analyzed on your device and are never uploaded.',
+                  'Photos are scanned on your device and are never uploaded. '
+                  '${AppConstants.shortDisclaimer}',
                   style: context.textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -124,12 +133,14 @@ class _PhotoSlot extends StatelessWidget {
     required this.onCamera,
     required this.onGallery,
     this.label,
+    this.placeholderIcon = Icons.face_retouching_natural,
   });
 
   final String? imagePath;
   final VoidCallback onCamera;
   final VoidCallback onGallery;
   final String? label;
+  final IconData placeholderIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -151,8 +162,8 @@ class _PhotoSlot extends StatelessWidget {
             ),
             clipBehavior: Clip.antiAlias,
             child: imagePath == null
-                ? const Center(
-                    child: Icon(Icons.face_retouching_natural,
+                ? Center(
+                    child: Icon(placeholderIcon,
                         size: 72, color: Colors.white70),
                   )
                 : Image.file(File(imagePath!), fit: BoxFit.cover),
