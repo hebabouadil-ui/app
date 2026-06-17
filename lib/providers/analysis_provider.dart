@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/constants/app_constants.dart';
@@ -110,6 +111,13 @@ class AnalysisController {
 
   final Ref ref;
 
+  /// Active language for generated readings (chosen locale → device → en).
+  String get _lang {
+    final String? chosen = ref.read(settingsProvider).locale?.languageCode;
+    return chosen ??
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  }
+
   /// Determines whether [type] needs an unlock before running.
   UnlockRequirement requirementFor(AnalysisType type) {
     final SettingsState settings = ref.read(settingsProvider);
@@ -137,6 +145,7 @@ class AnalysisController {
           type: type,
           features: features,
           salt: ref.read(userProvider).id,
+          lang: _lang,
         );
 
     await ref.read(analysisHistoryProvider.notifier).add(result);
@@ -165,6 +174,7 @@ class AnalysisController {
         ref.read(resultGeneratorProvider).generatePalm(
               imageSeed: seed,
               salt: ref.read(userProvider).id,
+              lang: _lang,
             );
     await ref.read(analysisHistoryProvider.notifier).add(result);
     if (countsAgainstQuota) {
@@ -192,6 +202,7 @@ class AnalysisController {
               a,
               b,
               salt: ref.read(userProvider).id,
+              lang: _lang,
             );
     await ref.read(analysisHistoryProvider.notifier).add(result);
     if (countsAgainstQuota) {

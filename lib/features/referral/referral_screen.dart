@@ -29,8 +29,21 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   }
 
   String _inviteText(String code) =>
-      'Join me on Dream AI ✨ Fun face insights & daily predictions! '
-      'Use my code $code when you sign up. ${AppConstants.websiteUrl}';
+      'Join me on Dream AI ✨ AI face & palm readings + daily predictions!\n'
+      'Use my code $code in Settings → Invite to get bonus credits.\n'
+      '${AppConstants.playStoreUrl}';
+
+  Future<void> _shareInvite(String code) async {
+    final String text = _inviteText(code);
+    final bool shared =
+        await ref.read(shareServiceProvider).shareText(text);
+    ref.read(analyticsServiceProvider).logReferral('invite_sent');
+    if (!shared && mounted) {
+      // No share target (e.g. emulator) — copy so it still "works".
+      await Clipboard.setData(ClipboardData(text: text));
+      if (mounted) context.showSnack('Invite copied to clipboard');
+    }
+  }
 
   Future<void> _apply() async {
     final bool ok =
@@ -101,11 +114,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
               ),
               const SizedBox(height: 12),
               FilledButton.icon(
-                onPressed: () => ref
-                    .read(shareServiceProvider)
-                    .shareText(_inviteText(user.referralCode))
-                    .then((_) =>
-                        ref.read(analyticsServiceProvider).logReferral('invite_sent')),
+                onPressed: () => _shareInvite(user.referralCode),
                 icon: const Icon(Icons.share_rounded),
                 label: Text(l10n.referralShare),
               ),

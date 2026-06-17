@@ -5,14 +5,9 @@ import '../models/daily_prediction.dart';
 import '../models/face_features.dart';
 import 'result_content.dart';
 
-/// Pure, deterministic, fully testable engine that turns a face-feature summary
-/// and/or the current date into entertainment-only results.
-///
-/// Determinism rules:
-///  * "Trait" experiences (personality, leadership, romance, etc.) are stable
-///    for a given face so re-scanning the same person feels consistent.
-///  * "Mood/energy" experiences (aura, daily luck, future mood, positive
-///    message) fold in the date so they refresh every day.
+/// Pure, deterministic, fully testable engine that turns a face/hand scan
+/// and/or the date into entertainment-only results — **localized** to the
+/// caller's language (en/es/ar, fallback en).
 class ResultGenerator {
   const ResultGenerator();
 
@@ -23,13 +18,14 @@ class ResultGenerator {
     AnalysisType.positiveMessage,
   };
 
-  /// Generates a result for a face-or-date based experience.
   AnalysisResult generate({
     required AnalysisType type,
     required FaceFeatures features,
     DateTime? now,
     String salt = '',
+    String lang = 'en',
   }) {
+    final String l = ResultContent.norm(lang);
     final DateTime ts = now ?? DateTime.now();
     final String dayPart =
         _dailyVarying.contains(type) ? _dayKey(ts) : 'fixed';
@@ -40,262 +36,274 @@ class ResultGenerator {
 
     switch (type) {
       case AnalysisType.auraScore:
-        return _aura(r, features, ts, id);
+        return _aura(r, features, ts, id, l);
       case AnalysisType.personality:
-        return _personality(r, features, ts, id);
+        return _personality(r, features, ts, id, l);
       case AnalysisType.firstImpression:
-        return _firstImpression(r, features, ts, id);
+        return _firstImpression(r, features, ts, id, l);
       case AnalysisType.leadership:
-        return _leadership(r, features, ts, id);
+        return _leadership(r, features, ts, id, l);
       case AnalysisType.romanticStyle:
-        return _romantic(r, features, ts, id);
+        return _romantic(r, features, ts, id, l);
       case AnalysisType.celebrityLookAlike:
-        return _celebrity(r, features, ts, id);
+        return _celebrity(r, features, ts, id, l);
       case AnalysisType.dailyLuck:
-        return _fromDaily(AnalysisType.dailyLuck, generateDailyPrediction(ts, salt: salt), ts, id);
+        return _fromDaily(AnalysisType.dailyLuck,
+            generateDailyPrediction(ts, salt: salt, lang: l), ts, id, l);
       case AnalysisType.futureMood:
-        return _fromDaily(AnalysisType.futureMood, generateDailyPrediction(ts, salt: salt), ts, id);
+        return _fromDaily(AnalysisType.futureMood,
+            generateDailyPrediction(ts, salt: salt, lang: l), ts, id, l);
       case AnalysisType.positiveMessage:
-        return _fromDaily(AnalysisType.positiveMessage, generateDailyPrediction(ts, salt: salt), ts, id);
+        return _fromDaily(AnalysisType.positiveMessage,
+            generateDailyPrediction(ts, salt: salt, lang: l), ts, id, l);
       case AnalysisType.palmReading:
-        // Palm uses an image seed; callers should use [generatePalm]. This is a
-        // safe fallback so the switch stays exhaustive.
-        return generatePalm(imageSeed: features.seedSignature, now: ts, salt: salt);
+        return generatePalm(imageSeed: features.seedSignature, now: ts, salt: salt, lang: l);
       case AnalysisType.friendshipCompatibility:
-        // Friendship needs two faces; callers should use [generateFriendship].
-        return _friendship(features, const FaceFeatures.none(), ts, salt: salt);
+        return _friendship(features, const FaceFeatures.none(), ts, salt: salt, lang: l);
     }
   }
 
-  /// Palm reading from a scanned hand photo's [imageSeed]
-  /// (see ImageScanService). Entertainment-only palmistry flavor.
-  AnalysisResult generatePalm({
-    required String imageSeed,
-    DateTime? now,
-    String salt = '',
-  }) {
-    final DateTime ts = now ?? DateTime.now();
-    final SeededRandom r = SeededRandom.fromString('palm|$imageSeed|$salt');
-    final arche = r.pick(ResultContent.palmArchetypes);
-    final int score = r.nextScore(min: 60);
-    return AnalysisResult(
-      id: 'palm-${ts.microsecondsSinceEpoch}',
-      type: AnalysisType.palmReading,
-      createdAt: ts,
-      primaryScore: score,
-      title: arche.name,
-      subtitle: 'Your palm reading',
-      summary:
-          '${r.pick(ResultContent.summaryOpeners)} ${r.pick(ResultContent.palmFortunes)}',
-      metrics: <ResultMetric>[
-        ResultMetric(label: 'Life Line', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Heart Line', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Head Line', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Fate Line', value: r.nextScore(min: 50)),
-      ],
-      traits: r.pickMany(ResultContent.traits, 3),
-      gradientName: 'royal',
-      emoji: arche.emoji,
-    );
-  }
-
-  /// Compatibility between two scanned faces.
   AnalysisResult generateFriendship(
     FaceFeatures a,
     FaceFeatures b, {
     DateTime? now,
     String salt = '',
+    String lang = 'en',
   }) {
-    return _friendship(a, b, now ?? DateTime.now(), salt: salt);
+    return _friendship(a, b, now ?? DateTime.now(),
+        salt: salt, lang: ResultContent.norm(lang));
   }
 
-  /// The deterministic-per-day fortune.
-  DailyPrediction generateDailyPrediction(DateTime day, {String salt = ''}) {
+  DailyPrediction generateDailyPrediction(DateTime day,
+      {String salt = '', String lang = 'en'}) {
+    final String l = ResultContent.norm(lang);
     final DateTime d = DateTime(day.year, day.month, day.day);
     final SeededRandom r =
         SeededRandom.fromString('daily|${_dayKey(d)}|$salt');
-    final mood = r.pick(ResultContent.moods);
+    final int moodIdx = r.nextInt(0, ResultContent.moodEmojis.length - 1);
     return DailyPrediction(
       date: d,
       luck: r.nextScore(),
       energy: r.nextScore(),
       productivity: r.nextScore(),
       social: r.nextScore(),
-      moodEmoji: mood.emoji,
-      moodLabel: mood.label,
-      message: r.pick(ResultContent.motivationalMessages),
-      luckyColor: r.pick(ResultContent.luckyColors),
+      moodEmoji: ResultContent.moodEmojis[moodIdx],
+      moodLabel: ResultContent.moodLabels(l)[moodIdx],
+      message: r.pick(ResultContent.motivationalMessages(l)),
+      luckyColor: r.pick(ResultContent.luckyColors(l)),
       luckyNumber: r.nextInt(1, 99),
-      affirmation: r.pick(ResultContent.affirmations),
+      affirmation: r.pick(ResultContent.affirmations(l)),
+    );
+  }
+
+  AnalysisResult generatePalm({
+    required String imageSeed,
+    DateTime? now,
+    String salt = '',
+    String lang = 'en',
+  }) {
+    final String l = ResultContent.norm(lang);
+    final DateTime ts = now ?? DateTime.now();
+    final SeededRandom r = SeededRandom.fromString('palm|$imageSeed|$salt');
+    final int i = r.nextInt(0, ResultContent.palmEmojis.length - 1);
+    final int score = r.nextScore(min: 60);
+    return AnalysisResult(
+      id: 'palm-${ts.microsecondsSinceEpoch}',
+      type: AnalysisType.palmReading,
+      createdAt: ts,
+      primaryScore: score,
+      title: ResultContent.palmArchetypes(l)[i],
+      subtitle: _t(l, 'Your palm reading', 'Tu lectura de mano', 'قراءة كفّك'),
+      summary:
+          '${r.pick(ResultContent.summaryOpeners(l))} ${r.pick(ResultContent.palmFortunes(l))}',
+      metrics: <ResultMetric>[
+        ResultMetric(label: ResultContent.label(l, 'lifeLine'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'heartLine'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'headLine'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'fateLine'), value: r.nextScore(min: 50)),
+      ],
+      traits: r.pickMany(ResultContent.traits(l), 3),
+      gradientName: 'royal',
+      emoji: ResultContent.palmEmojis[i],
     );
   }
 
   // ---------------------------------------------------------------------------
-  // Per-experience builders
-  // ---------------------------------------------------------------------------
 
   AnalysisResult _aura(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final aura = r.pick(ResultContent.auras);
-    final String adjective = r.pick(ResultContent.positiveAdjectives);
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final int i = r.nextInt(0, ResultContent.auraGradients.length - 1);
+    final String name = ResultContent.auraNames(l)[i];
+    final String adj = r.pick(ResultContent.adjectives(l));
     final int score = r.nextScore(min: 55);
     return AnalysisResult(
       id: id,
       type: AnalysisType.auraScore,
       createdAt: ts,
       primaryScore: score,
-      title: '${aura.name} Aura',
-      subtitle: 'You radiate $adjective energy',
-      summary:
-          '${r.pick(ResultContent.summaryOpeners)} your aura is glowing '
-          '${aura.name.toLowerCase()} today. People can\'t help but notice '
-          'your $adjective presence. Lean into it and share that glow!',
+      title: _t(l, '$name Aura', 'Aura $name', 'هالة $name'),
+      subtitle: _t(l, 'You radiate $adj energy', 'Irradias energía $adj',
+          'تُشِعّ طاقة $adj'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(
+            l,
+            'your aura is glowing today — lean into it and share that light!',
+            '¡tu aura brilla hoy: aprovéchala y comparte esa luz!',
+            'هالتك متوهّجة اليوم — استثمرها وشارك هذا النور!',
+          ),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Positivity', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Magnetism', value: r.nextScore(min: 50)),
-        ResultMetric(label: 'Calm', value: _blend(f.symmetry, r.nextScore())),
-        ResultMetric(label: 'Creativity', value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'positivity'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'magnetism'), value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'calm'), value: _blend(f.symmetry, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'creativity'), value: r.nextScore(min: 50)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
-      gradientName: aura.gradient,
-      emoji: aura.emoji,
-      extra: <String, String>{'aura': aura.name},
+      traits: r.pickMany(ResultContent.traits(l), 3),
+      gradientName: ResultContent.auraGradients[i],
+      emoji: ResultContent.auraEmojis[i],
+      extra: <String, String>{'aura': name},
     );
   }
 
   AnalysisResult _personality(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final archetype = r.pick(ResultContent.personalityArchetypes);
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final int i = r.nextInt(0, ResultContent.personalityEmojis.length - 1);
     return AnalysisResult(
       id: id,
       type: AnalysisType.personality,
       createdAt: ts,
       primaryScore: r.nextScore(min: 60),
-      title: archetype.name,
-      subtitle: 'Your personality archetype',
-      summary:
-          'You come across as ${archetype.name.replaceFirst('The ', '').toLowerCase()} — '
-          'someone who blends ${r.pick(ResultContent.traits).toLowerCase()} instincts with a '
-          '${r.pick(ResultContent.positiveAdjectives)} streak. Just a fun read, but a flattering one!',
+      title: ResultContent.personalityArchetypes(l)[i],
+      subtitle: _t(l, 'Your personality archetype',
+          'Tu arquetipo de personalidad', 'نمط شخصيتك'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(
+            l,
+            'a flattering, just-for-fun read of your vibe.',
+            'una lectura halagadora y divertida de tu vibra.',
+            'قراءة لطيفة وممتعة لطاقتك.',
+          ),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Openness', value: r.nextScore(min: 50)),
-        ResultMetric(label: 'Energy', value: r.nextScore(min: 50)),
-        ResultMetric(label: 'Warmth', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Focus', value: _blend(f.symmetry, r.nextScore())),
-        ResultMetric(label: 'Boldness', value: r.nextScore(min: 45)),
+        ResultMetric(label: ResultContent.label(l, 'openness'), value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'energy'), value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'warmth'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'focus'), value: _blend(f.symmetry, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'boldness'), value: r.nextScore(min: 45)),
       ],
-      traits: r.pickMany(ResultContent.traits, 4),
+      traits: r.pickMany(ResultContent.traits(l), 4),
       gradientName: AnalysisType.personality.gradient,
-      emoji: archetype.emoji,
+      emoji: ResultContent.personalityEmojis[i],
     );
   }
 
   AnalysisResult _firstImpression(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final String vibe = r.pick(ResultContent.firstImpressionVibes);
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final String vibe = r.pick(ResultContent.firstImpressionVibes(l));
     return AnalysisResult(
       id: id,
       type: AnalysisType.firstImpression,
       createdAt: ts,
       primaryScore: _blend(f.smilingProbability, r.nextScore(min: 55)),
-      title: 'You read as $vibe',
-      subtitle: 'First impression test',
-      summary:
-          'In the first few seconds, people tend to find you $vibe. '
-          'That\'s a great card to have in your hand — own it!',
+      title: _t(l, 'You read as $vibe', 'Transmites: $vibe', 'تبدو: $vibe'),
+      subtitle: _t(l, 'First impression', 'Primera impresión', 'الانطباع الأول'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(
+            l,
+            'in the first seconds, people find you $vibe — own it!',
+            'en los primeros segundos te perciben $vibe: ¡aprovéchalo!',
+            'في الثواني الأولى يرونك $vibe — تميّز بذلك!',
+          ),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Approachability', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Confidence', value: _blend(f.symmetry, r.nextScore())),
-        ResultMetric(label: 'Trustworthiness', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Charm', value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'approachability'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'confidence'), value: _blend(f.symmetry, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'trustworthiness'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'charm'), value: r.nextScore(min: 50)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
+      traits: r.pickMany(ResultContent.traits(l), 3),
       gradientName: AnalysisType.firstImpression.gradient,
       emoji: '👀',
     );
   }
 
   AnalysisResult _leadership(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final String archetype = r.pick(ResultContent.leadershipArchetypes);
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final String arche = r.pick(ResultContent.leadershipArchetypes(l));
     return AnalysisResult(
       id: id,
       type: AnalysisType.leadership,
       createdAt: ts,
       primaryScore: r.nextScore(min: 58),
-      title: archetype,
-      subtitle: 'Leadership style',
-      summary:
-          'Your leadership flavor is "$archetype". You lead with '
-          '${r.pick(ResultContent.traits).toLowerCase()} energy and a '
-          '${r.pick(ResultContent.positiveAdjectives)} touch.',
+      title: arche,
+      subtitle: _t(l, 'Leadership style', 'Estilo de liderazgo', 'أسلوب القيادة'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(l, 'a fun take on how you lead.', 'una mirada divertida a cómo lideras.', 'لمحة ممتعة عن أسلوبك في القيادة.'),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Vision', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Decisiveness', value: _blend(f.symmetry, r.nextScore())),
-        ResultMetric(label: 'Influence', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Composure', value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'vision'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'decisiveness'), value: _blend(f.symmetry, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'influence'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'composure'), value: r.nextScore(min: 55)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
+      traits: r.pickMany(ResultContent.traits(l), 3),
       gradientName: AnalysisType.leadership.gradient,
       emoji: '🏆',
     );
   }
 
   AnalysisResult _romantic(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final String style = r.pick(ResultContent.romanticStyles);
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final String style = r.pick(ResultContent.romanticStyles(l));
     return AnalysisResult(
       id: id,
       type: AnalysisType.romanticStyle,
       createdAt: ts,
       primaryScore: r.nextScore(min: 60),
       title: style,
-      subtitle: 'Your romantic style',
-      summary:
-          'In matters of the heart, you\'re "$style". You bring '
-          '${r.pick(ResultContent.traits).toLowerCase()} energy and a '
-          '${r.pick(ResultContent.positiveAdjectives)} charm to the people you love.',
+      subtitle: _t(l, 'Your romantic style', 'Tu estilo romántico', 'أسلوبك الرومانسي'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(l, 'a playful read on how you love.', 'una lectura divertida de cómo amas.', 'قراءة مرحة لطريقتك في الحب.'),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Passion', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Loyalty', value: r.nextScore(min: 60)),
-        ResultMetric(label: 'Playfulness', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Mystery', value: r.nextScore(min: 40)),
+        ResultMetric(label: ResultContent.label(l, 'passion'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'loyalty'), value: r.nextScore(min: 60)),
+        ResultMetric(label: ResultContent.label(l, 'playfulness'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'mystery'), value: r.nextScore(min: 40)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
+      traits: r.pickMany(ResultContent.traits(l), 3),
       gradientName: AnalysisType.romanticStyle.gradient,
       emoji: '💖',
     );
   }
 
   AnalysisResult _celebrity(
-      SeededRandom r, FaceFeatures f, DateTime ts, String id) {
-    final String vibe = r.pick(ResultContent.celebrityVibes);
-    final int match = r.nextScore(min: 72); // always flattering
+      SeededRandom r, FaceFeatures f, DateTime ts, String id, String l) {
+    final String vibe = r.pick(ResultContent.celebrityVibes(l));
+    final int match = r.nextScore(min: 72);
     return AnalysisResult(
       id: id,
       type: AnalysisType.celebrityLookAlike,
       createdAt: ts,
       primaryScore: match,
-      title: 'You give off $vibe energy',
-      subtitle: '$match% vibe match',
-      summary:
-          'Your overall vibe lines up with $vibe. It\'s a fun match based on '
-          'your expression and energy — not a literal look-alike.',
+      title: _t(l, 'You give off $vibe energy',
+          'Transmites la energía de $vibe', 'تُشِعّ طاقة $vibe'),
+      subtitle: _t(l, '$match% vibe match', '$match% de afinidad',
+          '$match% تطابق طاقة'),
+      summary: '${r.pick(ResultContent.summaryOpeners(l))} ' +
+          _t(l, 'a fun vibe match — not a literal look-alike.',
+              'una afinidad de vibra divertida, no un parecido literal.',
+              'تطابق طاقة ممتع — وليس شبهًا حرفيًا.'),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Star Power', value: r.nextScore(min: 60)),
-        ResultMetric(label: 'Screen Presence', value: _blend(f.smilingProbability, r.nextScore())),
-        ResultMetric(label: 'Charisma', value: r.nextScore(min: 60)),
+        ResultMetric(label: ResultContent.label(l, 'starPower'), value: r.nextScore(min: 60)),
+        ResultMetric(label: ResultContent.label(l, 'screenPresence'), value: _blend(f.smilingProbability, r.nextScore())),
+        ResultMetric(label: ResultContent.label(l, 'charisma'), value: r.nextScore(min: 60)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
+      traits: r.pickMany(ResultContent.traits(l), 3),
       gradientName: AnalysisType.celebrityLookAlike.gradient,
       emoji: '⭐',
       extra: <String, String>{'vibe': vibe},
     );
   }
 
-  AnalysisResult _friendship(
-      FaceFeatures a, FaceFeatures b, DateTime ts,
-      {String salt = ''}) {
+  AnalysisResult _friendship(FaceFeatures a, FaceFeatures b, DateTime ts,
+      {String salt = '', String lang = 'en'}) {
+    final String l = ResultContent.norm(lang);
     final SeededRandom r = SeededRandom.fromString(
       'friendship|${a.seedSignature}|${b.seedSignature}|$salt',
     );
@@ -305,26 +313,28 @@ class ResultGenerator {
       type: AnalysisType.friendshipCompatibility,
       createdAt: ts,
       primaryScore: score,
-      title: '$score% Compatible',
-      subtitle: 'Friendship compatibility',
-      summary:
-          'You two have a $score% friendship match! Your energies '
-          '${score > 80 ? 'click instantly' : 'complement each other'} — '
-          'expect ${r.pick(ResultContent.traits).toLowerCase()} adventures together.',
+      title: _t(l, '$score% Compatible', '$score% Compatibles', '$score% متوافقان'),
+      subtitle: _t(l, 'Friendship compatibility', 'Compatibilidad de amistad', 'توافق الصداقة'),
+      summary: _t(
+        l,
+        'You two have a $score% match — expect great adventures together!',
+        '¡Tienen un $score% de afinidad: les esperan grandes aventuras!',
+        'بينكما توافق $score% — تنتظركما مغامرات رائعة!',
+      ),
       metrics: <ResultMetric>[
-        ResultMetric(label: 'Communication', value: r.nextScore(min: 55)),
-        ResultMetric(label: 'Fun Factor', value: r.nextScore(min: 60)),
-        ResultMetric(label: 'Trust', value: r.nextScore(min: 58)),
-        ResultMetric(label: 'Adventure', value: r.nextScore(min: 50)),
+        ResultMetric(label: ResultContent.label(l, 'communication'), value: r.nextScore(min: 55)),
+        ResultMetric(label: ResultContent.label(l, 'funFactor'), value: r.nextScore(min: 60)),
+        ResultMetric(label: ResultContent.label(l, 'trust'), value: r.nextScore(min: 58)),
+        ResultMetric(label: ResultContent.label(l, 'adventure'), value: r.nextScore(min: 50)),
       ],
-      traits: r.pickMany(ResultContent.traits, 3),
+      traits: r.pickMany(ResultContent.traits(l), 3),
       gradientName: AnalysisType.friendshipCompatibility.gradient,
       emoji: '🤝',
     );
   }
 
   AnalysisResult _fromDaily(
-      AnalysisType type, DailyPrediction p, DateTime ts, String id) {
+      AnalysisType type, DailyPrediction p, DateTime ts, String id, String l) {
     switch (type) {
       case AnalysisType.dailyLuck:
         return AnalysisResult(
@@ -332,22 +342,24 @@ class ResultGenerator {
           type: type,
           createdAt: ts,
           primaryScore: p.luck,
-          title: 'Daily Luck: ${p.luck}',
-          subtitle: 'Lucky color ${p.luckyColor} • Number ${p.luckyNumber}',
+          title: _t(l, 'Daily Luck: ${p.luck}', 'Suerte diaria: ${p.luck}', 'حظ اليوم: ${p.luck}'),
+          subtitle: _t(
+            l,
+            'Lucky color ${p.luckyColor} • Number ${p.luckyNumber}',
+            'Color ${p.luckyColor} • Número ${p.luckyNumber}',
+            'لون ${p.luckyColor} • رقم ${p.luckyNumber}',
+          ),
           summary: p.message,
           metrics: <ResultMetric>[
-            ResultMetric(label: 'Luck', value: p.luck),
-            ResultMetric(label: 'Energy', value: p.energy),
-            ResultMetric(label: 'Productivity', value: p.productivity),
-            ResultMetric(label: 'Social', value: p.social),
+            ResultMetric(label: ResultContent.label(l, 'luck'), value: p.luck),
+            ResultMetric(label: ResultContent.label(l, 'energy'), value: p.energy),
+            ResultMetric(label: ResultContent.label(l, 'productivity'), value: p.productivity),
+            ResultMetric(label: ResultContent.label(l, 'social'), value: p.social),
           ],
-          traits: <String>[p.luckyColor, 'Lucky #${p.luckyNumber}'],
+          traits: <String>[p.luckyColor, '#${p.luckyNumber}'],
           gradientName: type.gradient,
           emoji: '🍀',
-          extra: <String, String>{
-            'luckyColor': p.luckyColor,
-            'luckyNumber': '${p.luckyNumber}',
-          },
+          extra: <String, String>{'luckyColor': p.luckyColor, 'luckyNumber': '${p.luckyNumber}'},
         );
       case AnalysisType.futureMood:
         return AnalysisResult(
@@ -355,15 +367,19 @@ class ResultGenerator {
           type: type,
           createdAt: ts,
           primaryScore: p.overall,
-          title: 'Mood Forecast: ${p.moodLabel}',
-          subtitle: 'How your day may feel',
-          summary:
-              'Your mood forecast is "${p.moodLabel}" ${p.moodEmoji}. ${p.message}',
+          title: _t(l, 'Mood Forecast: ${p.moodLabel}', 'Pronóstico: ${p.moodLabel}', 'توقّع المزاج: ${p.moodLabel}'),
+          subtitle: _t(l, 'How your day may feel', 'Cómo se siente tu día', 'كيف قد يكون يومك'),
+          summary: _t(
+            l,
+            'Your mood forecast is "${p.moodLabel}" ${p.moodEmoji}. ${p.message}',
+            'Tu pronóstico de ánimo es "${p.moodLabel}" ${p.moodEmoji}. ${p.message}',
+            'توقّع مزاجك هو «${p.moodLabel}» ${p.moodEmoji}. ${p.message}',
+          ),
           metrics: <ResultMetric>[
-            ResultMetric(label: 'Morning', value: p.energy),
-            ResultMetric(label: 'Afternoon', value: p.productivity),
-            ResultMetric(label: 'Evening', value: p.social),
-            ResultMetric(label: 'Overall', value: p.overall),
+            ResultMetric(label: ResultContent.label(l, 'morning'), value: p.energy),
+            ResultMetric(label: ResultContent.label(l, 'afternoon'), value: p.productivity),
+            ResultMetric(label: ResultContent.label(l, 'evening'), value: p.social),
+            ResultMetric(label: ResultContent.label(l, 'overall'), value: p.overall),
           ],
           traits: <String>[p.moodLabel],
           gradientName: type.gradient,
@@ -375,15 +391,18 @@ class ResultGenerator {
           type: type,
           createdAt: ts,
           primaryScore: 100,
-          title: 'Today\'s Positive Message',
-          subtitle: 'A little reminder for you',
+          title: _t(l, 'Today\'s Positive Message', 'Mensaje positivo de hoy', 'رسالة اليوم الإيجابية'),
+          subtitle: _t(l, 'A little reminder for you', 'Un pequeño recordatorio', 'تذكير صغير لك'),
           summary: p.affirmation,
-          metrics: const <ResultMetric>[
-            ResultMetric(label: 'Positivity', value: 100),
-            ResultMetric(label: 'Self-Love', value: 97),
-            ResultMetric(label: 'Gratitude', value: 95),
+          metrics: <ResultMetric>[
+            ResultMetric(label: ResultContent.label(l, 'positivity'), value: 100),
+            ResultMetric(label: ResultContent.label(l, 'selfLove'), value: 97),
+            ResultMetric(label: ResultContent.label(l, 'gratitude'), value: 95),
           ],
-          traits: const <String>['You matter', 'Keep shining'],
+          traits: <String>[
+            _t(l, 'You matter', 'Importas', 'أنت مهم'),
+            _t(l, 'Keep shining', 'Sigue brillando', 'واصل التألّق'),
+          ],
           gradientName: type.gradient,
           emoji: '🌟',
         );
@@ -394,8 +413,10 @@ class ResultGenerator {
 
   // ---------------------------------------------------------------------------
 
-  /// Blends a 0–1 feature signal with a random score so results react to the
-  /// face yet stay playful and varied.
+  /// Picks the localized string for [l].
+  String _t(String l, String en, String es, String ar) =>
+      l == 'es' ? es : (l == 'ar' ? ar : en);
+
   int _blend(double signal, int random) {
     final double v = (signal.clamp(0.0, 1.0) * 100 * 0.45) + (random * 0.55);
     return v.round().clamp(20, 99);

@@ -25,7 +25,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _personalizedAds = true;
   bool _finishing = false;
 
-  static const int _lastPage = 3;
+  static const int _lastPage = 2;
 
   @override
   void dispose() {
@@ -79,12 +79,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         gradient: 'aura',
         title: l10n.onbTitle1,
         body: l10n.onbBody1,
-      ),
-      _OnbPageData(
-        emoji: '🎈',
-        gradient: 'sunrise',
-        title: l10n.onbTitle2,
-        body: l10n.onbBody2,
       ),
       _OnbPageData(
         emoji: '🔔',

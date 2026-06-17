@@ -20,6 +20,11 @@ abstract final class AppConstants {
   static const String androidPackage = 'app.dreamai.faceanalyzer';
   static const String iosAppId = '0000000000';
 
+  /// Public install link shared in referral invites. Works once the app is on
+  /// the Play Store; until then it resolves to the listing page.
+  static const String playStoreUrl =
+      'https://play.google.com/store/apps/details?id=$androidPackage';
+
   // Minimum age — keeps the app out of the "children" category (COPPA/Families).
   static const int minimumAge = 13;
 
