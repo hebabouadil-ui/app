@@ -87,9 +87,9 @@ class _AnalyzingScreenState extends ConsumerState<AnalyzingScreen> {
   String _scanningLabel(BuildContext context) {
     switch (widget.args.type.scanKind) {
       case ScanKind.hand:
-        return 'Scanning the lines of your palm…';
+        return context.l10n.scanningPalm;
       case ScanKind.face:
-        return 'Scanning your facial features…';
+        return context.l10n.scanningFace;
       case ScanKind.none:
         return context.l10n.analyzingSubtitle;
     }

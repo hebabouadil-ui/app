@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/router/route_args.dart';
@@ -73,7 +72,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(_isHand ? 'Palm Scan' : l10n.scanTitle)),
+      appBar: AppBar(title: Text(_isHand ? l10n.palmScanTitle : l10n.scanTitle)),
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -82,14 +81,14 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
-                  _isHand
-                      ? 'Take a clear photo of your open palm. The scan runs on your device.'
-                      : l10n.scanSubtitle,
+                  _isHand ? l10n.palmInstruction : l10n.scanSubtitle,
                   style: context.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 20),
                 _PhotoSlot(
-                  label: _isFriendship ? 'You' : (_isHand ? 'Your palm' : null),
+                  label: _isFriendship
+                      ? l10n.slotYou
+                      : (_isHand ? l10n.slotYourPalm : null),
                   placeholderIcon:
                       _isHand ? Icons.front_hand : Icons.face_retouching_natural,
                   imagePath: _imagePath,
@@ -99,7 +98,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 if (_isFriendship) ...<Widget>[
                   const SizedBox(height: 16),
                   _PhotoSlot(
-                    label: 'Friend',
+                    label: l10n.slotFriend,
                     imagePath: _secondImagePath,
                     onCamera: () => _pick(ImageSource.camera, second: true),
                     onGallery: () => _pick(ImageSource.gallery, second: true),
@@ -113,8 +112,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Photos are scanned on your device and are never uploaded. '
-                  '${AppConstants.shortDisclaimer}',
+                  l10n.scanPrivacyNote,
                   style: context.textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),

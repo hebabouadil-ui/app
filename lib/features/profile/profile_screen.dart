@@ -24,12 +24,13 @@ class ProfileScreen extends ConsumerWidget {
     final String? name = await showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Your name'),
+        title: Text(context.l10n.profileNameTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
           maxLength: 24,
-          decoration: const InputDecoration(hintText: 'Dreamer'),
+          decoration:
+              InputDecoration(hintText: context.l10n.profileNameHint),
         ),
         actions: <Widget>[
           TextButton(

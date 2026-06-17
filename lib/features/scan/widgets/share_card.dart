@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/theme/app_gradients.dart';
 import '../../../data/models/analysis_result.dart';
 
@@ -101,7 +102,7 @@ class ShareableResultCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'For entertainment only • Get yours on Dream AI',
+            context.l10n.shareCardCta,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 11),
           ),

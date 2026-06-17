@@ -71,14 +71,14 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                     child: _StatTile(
                         emoji: '🧪',
                         value: '${s.analysesCompleted}',
-                        label: 'Analyses'),
+                        label: l10n.statAnalyses),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _StatTile(
                         emoji: '📣',
                         value: '${s.sharesCount}',
-                        label: 'Shares'),
+                        label: l10n.statShares),
                   ),
                 ],
               ),

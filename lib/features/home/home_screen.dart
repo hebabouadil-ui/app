@@ -100,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ? null
                         : Chip(
                             label: Text(
-                              'Free today: ${(AppConstants.freeAnalysesPerDay - used).clamp(0, AppConstants.freeAnalysesPerDay)}/${AppConstants.freeAnalysesPerDay}',
+                              '${l10n.homeFreeToday}: ${(AppConstants.freeAnalysesPerDay - used).clamp(0, AppConstants.freeAnalysesPerDay)}/${AppConstants.freeAnalysesPerDay}',
                             ),
                           ),
                   ),

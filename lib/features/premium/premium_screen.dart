@@ -19,14 +19,6 @@ class PremiumScreen extends ConsumerStatefulWidget {
 }
 
 class _PremiumScreenState extends ConsumerState<PremiumScreen> {
-  static const List<({String emoji, String title, String sub})> _perks = [
-    (emoji: '🖐️', title: 'AI Palm Reading', sub: 'Scan your hand for a deep reading'),
-    (emoji: '👑', title: 'Leadership & Romance', sub: 'Unlock every advanced face reading'),
-    (emoji: '⭐', title: 'Celebrity Match & Friendship', sub: 'See who you share star energy with'),
-    (emoji: '🚫', title: 'No ads', sub: 'A clean, uninterrupted experience'),
-    (emoji: '♾️', title: 'Unlimited readings', sub: 'No daily limit, ever'),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -43,6 +35,14 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     final bool isPro = ref.watch(settingsProvider).isPro;
     final purchases = ref.read(purchaseServiceProvider);
     final String? price = purchases.productById(ProductIds.pro)?.price;
+    final List<({String emoji, String title, String sub})> perks =
+        <({String emoji, String title, String sub})>[
+      (emoji: '🖐️', title: l10n.perkPalmTitle, sub: l10n.perkPalmSub),
+      (emoji: '👑', title: l10n.perkAdvancedTitle, sub: l10n.perkAdvancedSub),
+      (emoji: '⭐', title: l10n.perkStarTitle, sub: l10n.perkStarSub),
+      (emoji: '🚫', title: l10n.perkNoAdsTitle, sub: l10n.perkNoAdsSub),
+      (emoji: '♾️', title: l10n.perkUnlimitedTitle, sub: l10n.perkUnlimitedSub),
+    ];
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.premiumTitle)),
@@ -69,11 +69,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           curve: Curves.easeInOut,
                         ),
                     const SizedBox(height: 12),
-                    Text('Dream AI Pro',
+                    Text(l10n.proName,
                         style: context.textTheme.headlineMedium
                             ?.copyWith(color: Colors.white)),
                     const SizedBox(height: 6),
-                    Text('One payment. Unlock everything, forever.',
+                    Text(l10n.proTagline,
                         textAlign: TextAlign.center,
                         style: context.textTheme.bodyMedium
                             ?.copyWith(color: Colors.white70)),
@@ -81,8 +81,8 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 ),
               ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.1, end: 0),
               const SizedBox(height: 22),
-              for (int i = 0; i < _perks.length; i++)
-                _PerkRow(perk: _perks[i])
+              for (int i = 0; i < perks.length; i++)
+                _PerkRow(perk: perks[i])
                     .animate(delay: (120 * i).ms)
                     .fadeIn(duration: 300.ms)
                     .slideX(begin: 0.15, end: 0),
@@ -99,7 +99,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                     children: <Widget>[
                       const Icon(Icons.verified_rounded, color: Color(0xFF34D399)),
                       const SizedBox(width: 10),
-                      Text("You're Pro — enjoy! ✨",
+                      Text(l10n.proOwned,
                           style: context.textTheme.titleMedium),
                     ],
                   ),
@@ -107,9 +107,8 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               else ...<Widget>[
                 FilledButton(
                   onPressed: () => purchases.buy(ProductIds.pro),
-                  child: Text(price == null
-                      ? '${l10n.premiumUnlock} Dream AI Pro'
-                      : 'Unlock Pro — $price'),
+                  child: Text(
+                      price == null ? l10n.proUnlock : '${l10n.proUnlock} — $price'),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
@@ -119,8 +118,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               ],
               const SizedBox(height: 10),
               Text(
-                'One-time purchase, no subscription. Payment is charged to your '
-                'store account. Restore anytime on a new device.',
+                l10n.proLegal,
                 textAlign: TextAlign.center,
                 style: context.textTheme.bodySmall,
               ),
