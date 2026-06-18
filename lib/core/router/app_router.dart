@@ -8,6 +8,7 @@ import '../../features/legal/privacy_policy_screen.dart';
 import '../../features/legal/terms_screen.dart';
 import '../../features/navigation/root_shell.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/oracle/oracle_screen.dart';
 import '../../features/predictions/predictions_screen.dart';
 import '../../features/premium/premium_screen.dart';
 import '../../features/profile/profile_screen.dart';
@@ -112,6 +113,11 @@ final goRouterProvider = Provider<GoRouter>((Ref ref) {
           final AnalysisOutcome outcome = state.extra! as AnalysisOutcome;
           return ResultScreen(result: outcome.result, delta: outcome.delta);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.oracle,
+        parentNavigatorKey: _rootKey,
+        builder: (_, __) => const OracleScreen(),
       ),
       GoRoute(
         path: AppRoutes.premium,

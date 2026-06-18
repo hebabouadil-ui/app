@@ -10,6 +10,7 @@ abstract final class AppRoutes {
   static const String scan = '/scan';
   static const String analyzing = '/analyzing';
   static const String result = '/result';
+  static const String oracle = '/oracle';
 
   static const String premium = '/premium';
   static const String referral = '/referral';

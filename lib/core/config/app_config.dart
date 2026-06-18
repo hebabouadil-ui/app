@@ -10,6 +10,7 @@ class AppConfig {
     this.appOpenAdEnabled = true,
     this.interstitialAfterResult = true,
     this.interstitialMinIntervalSeconds = 90,
+    this.rewardedAdsToUnlock = 2,
     this.analyticsEnabled = true,
     this.referralEnabled = true,
     this.reviewPromptEnabled = true,
@@ -22,6 +23,9 @@ class AppConfig {
   final bool appOpenAdEnabled;
   final bool interstitialAfterResult;
   final int interstitialMinIntervalSeconds;
+
+  /// How many rewarded ads the user watches to unlock a premium experience.
+  final int rewardedAdsToUnlock;
   final bool analyticsEnabled;
   final bool referralEnabled;
   final bool reviewPromptEnabled;
@@ -33,6 +37,7 @@ class AppConfig {
     bool? appOpenAdEnabled,
     bool? interstitialAfterResult,
     int? interstitialMinIntervalSeconds,
+    int? rewardedAdsToUnlock,
     bool? analyticsEnabled,
     bool? referralEnabled,
     bool? reviewPromptEnabled,
@@ -46,6 +51,7 @@ class AppConfig {
           interstitialAfterResult ?? this.interstitialAfterResult,
       interstitialMinIntervalSeconds:
           interstitialMinIntervalSeconds ?? this.interstitialMinIntervalSeconds,
+      rewardedAdsToUnlock: rewardedAdsToUnlock ?? this.rewardedAdsToUnlock,
       analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
       referralEnabled: referralEnabled ?? this.referralEnabled,
       reviewPromptEnabled: reviewPromptEnabled ?? this.reviewPromptEnabled,

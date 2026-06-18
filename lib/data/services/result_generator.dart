@@ -3,6 +3,7 @@ import '../models/analysis_result.dart';
 import '../models/analysis_type.dart';
 import '../models/daily_prediction.dart';
 import '../models/face_features.dart';
+import 'oracle_content.dart';
 import 'result_content.dart';
 
 /// Pure, deterministic, fully testable engine that turns a face/hand scan
@@ -386,6 +387,8 @@ class ResultGenerator {
           emoji: p.moodEmoji,
         );
       case AnalysisType.positiveMessage:
+        final SeededRandom rr =
+            SeededRandom.fromString('positive|${p.dateKey}|$l');
         return AnalysisResult(
           id: id,
           type: type,
@@ -393,7 +396,7 @@ class ResultGenerator {
           primaryScore: 100,
           title: _t(l, 'Today\'s Positive Message', 'Mensaje positivo de hoy', 'رسالة اليوم الإيجابية'),
           subtitle: _t(l, 'A little reminder for you', 'Un pequeño recordatorio', 'تذكير صغير لك'),
-          summary: p.affirmation,
+          summary: rr.pick(OracleContent.messages(l)),
           metrics: <ResultMetric>[
             ResultMetric(label: ResultContent.label(l, 'positivity'), value: 100),
             ResultMetric(label: ResultContent.label(l, 'selfLove'), value: 97),

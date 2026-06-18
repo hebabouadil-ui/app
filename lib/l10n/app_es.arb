@@ -173,6 +173,12 @@
   "profileNameHint": "Soñador",
   "shareCardCta": "Solo por diversión • Consíguelo en Dream AI",
 
+  "oracleTitle": "Oráculo diario",
+  "oracleIntro": "Saca una carta y deja que el mensaje de hoy te encuentre.",
+  "oracleTapReveal": "Toca para revelar",
+  "oracleDrawAgain": "Sacar otra",
+  "oracleHomeCta": "Saca tu carta del Oráculo",
+
   "celebrationLevelUp": "¡Subiste de nivel! Ahora eres nivel {level}",
   "celebrationBadge": "¡Nueva insignia desbloqueada!",
   "celebrationStreak": "¡Racha ampliada! Sigue así.",

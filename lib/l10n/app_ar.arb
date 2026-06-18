@@ -173,6 +173,12 @@
   "profileNameHint": "حالم",
   "shareCardCta": "للتسلية فقط • احصل عليه من Dream AI",
 
+  "oracleTitle": "عرّافة اليوم",
+  "oracleIntro": "اسحب بطاقة ودع رسالة اليوم تجدك.",
+  "oracleTapReveal": "اضغط للكشف",
+  "oracleDrawAgain": "اسحب أخرى",
+  "oracleHomeCta": "اسحب بطاقة عرّافة اليوم",
+
   "celebrationLevelUp": "ترقية! أنت الآن في المستوى {level}",
   "celebrationBadge": "وسام جديد مفتوح!",
   "celebrationStreak": "امتدت سلسلتك! واصل.",

@@ -35,17 +35,25 @@ class _UnlockSheet extends ConsumerStatefulWidget {
 class _UnlockSheetState extends ConsumerState<_UnlockSheet> {
   bool _busy = false;
 
+  int _adsWatched = 0;
+
   Future<void> _watchAd() async {
+    final int required = ref.read(appConfigProvider).rewardedAdsToUnlock;
     setState(() => _busy = true);
     final ads = ref.read(adsServiceProvider);
     final bool earned = await ads.showRewarded();
     if (!mounted) return;
-    if (earned) {
-      ref.read(analyticsServiceProvider).logRewardEarned('unlock_experience');
+    setState(() => _busy = false);
+    if (!earned) {
+      context.showSnack('Ad not ready yet — please try again.');
+      return;
+    }
+    ref.read(analyticsServiceProvider).logRewardEarned('unlock_experience');
+    setState(() => _adsWatched++);
+    if (_adsWatched >= required) {
       Navigator.of(context).pop(true);
     } else {
-      setState(() => _busy = false);
-      context.showSnack('Ad not ready yet — please try again.');
+      context.showSnack('Nice! Watch ${required - _adsWatched} more to unlock.');
     }
   }
 
@@ -90,11 +98,18 @@ class _UnlockSheetState extends ConsumerState<_UnlockSheet> {
               child: Center(child: CircularProgressIndicator()),
             )
           else ...<Widget>[
-            FilledButton.icon(
-              onPressed: rewardedReady ? _watchAd : null,
-              icon: const Icon(Icons.play_circle_fill_rounded),
-              label: Text(l10n.premiumWatchAd),
-            ),
+            Builder(builder: (BuildContext context) {
+              final int required =
+                  ref.read(appConfigProvider).rewardedAdsToUnlock;
+              final String label = required > 1
+                  ? '${l10n.premiumWatchAd} ($_adsWatched/$required)'
+                  : l10n.premiumWatchAd;
+              return FilledButton.icon(
+                onPressed: rewardedReady ? _watchAd : null,
+                icon: const Icon(Icons.play_circle_fill_rounded),
+                label: Text(label),
+              );
+            }),
             const SizedBox(height: 10),
             if (credits > 0)
               OutlinedButton.icon(

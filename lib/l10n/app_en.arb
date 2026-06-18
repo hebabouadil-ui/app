@@ -179,6 +179,12 @@
   "profileNameHint": "Dreamer",
   "shareCardCta": "For entertainment only • Get yours on Dream AI",
 
+  "oracleTitle": "Daily Oracle",
+  "oracleIntro": "Pull a card and let today's message find you.",
+  "oracleTapReveal": "Tap to reveal",
+  "oracleDrawAgain": "Draw again",
+  "oracleHomeCta": "Pull your Daily Oracle card",
+
   "celebrationLevelUp": "Level up! You're now level {level}",
   "@celebrationLevelUp": { "placeholders": { "level": { "type": "int" } } },
   "celebrationBadge": "New badge unlocked!",

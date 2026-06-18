@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/router/app_routes.dart';
+import '../../core/theme/app_gradients.dart';
+import '../../core/theme/app_theme.dart';
 import '../../data/models/analysis_type.dart';
 import '../../providers/analysis_provider.dart';
 import '../../providers/gamification_provider.dart';
@@ -90,9 +92,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       if (streak > 0) _StreakChip(streak: streak),
                     ],
-                  ),
+                  )
+                      .animate()
+                      .fadeIn(duration: 300.ms)
+                      .slideX(begin: -0.08, end: 0),
                   const SizedBox(height: 16),
-                  const DailySnapshotCard(),
+                  const _OracleHero()
+                      .animate()
+                      .fadeIn(delay: 80.ms, duration: 350.ms)
+                      .slideY(begin: 0.12, end: 0),
+                  const SizedBox(height: 16),
+                  const DailySnapshotCard()
+                      .animate()
+                      .fadeIn(delay: 160.ms, duration: 350.ms)
+                      .slideY(begin: 0.12, end: 0),
                   const SizedBox(height: 24),
                   SectionHeader(
                     title: l10n.homeExplore,
@@ -139,6 +152,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+}
+
+class _OracleHero extends StatelessWidget {
+  const _OracleHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppTheme.radius),
+      onTap: () => context.push(AppRoutes.oracle),
+      child: Ink(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: AppGradients.aura,
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+        ),
+        child: Row(
+          children: <Widget>[
+            const Text('🔮', style: TextStyle(fontSize: 34))
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scale(
+                  begin: const Offset(0.92, 0.92),
+                  end: const Offset(1.12, 1.12),
+                  duration: 1500.ms,
+                  curve: Curves.easeInOut,
+                ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                context.l10n.oracleHomeCta,
+                style: context.textTheme.titleMedium
+                    ?.copyWith(color: Colors.white),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white),
+          ],
+        ),
+      ),
+    )
+        .animate(onPlay: (c) => c.repeat())
+        .shimmer(delay: 1200.ms, duration: 1800.ms, color: Colors.white24);
   }
 }
 
